@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Counting Down To You ❤️</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Glassmorphism card utility */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-card-dark {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            outline: none;
+        }
+
+        /* Smooth canvas background scaling */
+        #bg-overlay {
+            transition: background-image 0.6s ease-in-out, opacity 0.5s ease;
+        }
+
+        /* Custom scrollbar for control drawer */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        /* Subtle floating animation for countdown units */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+
+        /* Heart pulse animation */
+        @keyframes pulseHeart {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        .animate-heart {
+            animation: pulseHeart 1.8s infinite;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen overflow-x-hidden relative flex flex-col justify-between selection:bg-rose-500 selection:text-white">
+
+    <!-- Dynamic Background Image & Gradient Layers -->
+    <div id="bg-overlay" class="fixed inset-0 bg-cover bg-center bg-no-repeat z-0 transition-all duration-700 scale-105"></div>
+    <div id="bg-gradient" class="fixed inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70 z-0"></div>
+
+    <!-- Floating Canvas Particle Layer -->
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- Top Action Bar (Edit / Share Buttons) -->
+    <header class="relative z-10 w-full max-w-5xl mx-auto px-4 pt-6 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-rose-300">
+                <i class="fa-solid font-heart animate-heart text-sm"></i>
+            </span>
+            <span class="text-xs sm:text-sm font-semibold tracking-wider uppercase opacity-80 backdrop-blur-sm px-2.5 py-1 rounded-full bg-black/20 border border-white/10">Together App</span>
+        </div>
+
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <!-- Share Button -->
+            <button id="shareBtn" onclick="copyShareableLink()" class="px-3.5 py-2 rounded-xl bg-rose-600/80 hover:bg-rose-500 backdrop-blur-md text-white text-xs sm:text-sm font-medium transition-all shadow-lg hover:shadow-rose-500/25 active:scale-95 flex items-center gap-2 border border-rose-400/30">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span id="shareBtnText">Share Link</span>
+            </button>
+
+            <!-- Toggle Customizer Button -->
+            <button id="toggleDrawerBtn" onclick="toggleDrawer()" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs sm:text-sm font-medium transition-all border border-white/20 active:scale-95 flex items-center gap-2">
+                <i class="fa-solid fa-sliders"></i>
+                <span class="hidden sm:inline">Customize</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Center Countdown Card -->
+    <main class="relative z-10 flex-1 flex flex-col justify-center items-center px-4 py-8 sm:py-12 my-auto">
+        <div class="w-full max-w-3xl mx-auto text-center space-y-6 sm:space-y-8">
+            
+            <!-- Event Title Header -->
+            <div class="space-y-3">
+                <div class="inline-block px-4 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-rose-200 text-xs sm:text-sm font-medium tracking-widest uppercase">
+                    <span id="displaySubtitle">Counting Down The Moments</span>
+                </div>
+                <h1 id="displayTitle" class="text-3xl sm:text-5xl md:text-6xl font-serif-title font-bold text-white tracking-wide leading-tight drop-shadow-md">
+                    Until We Are Together
+                </h1>
+            </div>
+
+            <!-- Countdown Timer Blocks -->
+            <div class="grid grid-cols-4 gap-2 sm:gap-4 md:gap-6 my-6 max-w-2xl mx-auto">
+                <!-- Days Block -->
+                <div class="glass-card rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center transition-transform hover:scale-105 animate-float">
+                    <span id="days" class="text-2xl sm:text-4xl md:text-5xl font-bold font-cinzel text-white drop-shadow">00</span>
+                    <span class="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-rose-200/80 mt-1">Days</span>
+                </div>
+
+                <!-- Hours Block -->
+                <div class="glass-card rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center transition-transform hover:scale-105 animate-float" style="animation-delay: 0.2s;">
+                    <span id="hours" class="text-2xl sm:text-4xl md:text-5xl font-bold font-cinzel text-white drop-shadow">00</span>
+                    <span class="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-rose-200/80 mt-1">Hours</span>
+                </div>
+
+                <!-- Minutes Block -->
+                <div class="glass-card rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center transition-transform hover:scale-105 animate-float" style="animation-delay: 0.4s;">
+                    <span id="minutes" class="text-2xl sm:text-4xl md:text-5xl font-bold font-cinzel text-white drop-shadow">00</span>
+                    <span class="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-rose-200/80 mt-1">Mins</span>
+                </div>
+
+                <!-- Seconds Block -->
+                <div class="glass-card rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center transition-transform hover:scale-105 animate-float" style="animation-delay: 0.6s;">
+                    <span id="seconds" class="text-2xl sm:text-4xl md:text-5xl font-bold font-cinzel text-rose-300 drop-shadow">00</span>
+                    <span class="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-rose-200/80 mt-1">Secs</span>
+                </div>
+            </div>
+
+            <!-- Target Date & Personal Warm Message Box -->
+            <div class="max-w-xl mx-auto space-y-4">
+                <div class="glass-card rounded-2xl p-5 sm:p-6 border border-white/20 text-center relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-rose-500/20 rounded-full blur-2xl"></div>
+                    
+                    <p id="displayTargetDate" class="text-xs sm:text-sm text-rose-200/90 font-medium tracking-wide mb-2">
+                        <i class="fa-regular fa-calendar-heart mr-1.5"></i> Target Date
+                    </p>
+                    <p id="displayMessage" class="text-base sm:text-lg md:text-xl font-serif-title italic text-white/95 leading-relaxed">
+                        "Every second spent apart is just another step closer to holding you again."
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Customization Control Drawer (Slide-In Panel) -->
+    <div id="drawerOverlay" onclick="toggleDrawer()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+    <aside id="customizerDrawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md glass-card-dark z-50 transform translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between p-6 overflow-y-auto">
+        <div class="space-y-6">
+            <!-- Drawer Header -->
+            <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-rose-400"></i>
+                    <h2 class="text-lg font-semibold text-white">Customize Timer</h2>
+                </div>
+                <button onclick="toggleDrawer()" class="w-8 h-8 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Configuration Form -->
+            <div class="space-y-4">
+                <!-- Title Input -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-rose-200/80 mb-1.5">Event Title</label>
+                    <input type="text" id="inputTitle" value="Until We Are Together" placeholder="e.g. Back In Your Arms" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-sm focus:ring-2 focus:ring-rose-400 transition-all">
+                </div>
+
+                <!-- Subtitle / Category Input -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-rose-200/80 mb-1.5">Badge Subtitle</label>
+                    <input type="text" id="inputSubtitle" value="Counting Down The Moments" placeholder="e.g. Next Reunion" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-sm focus:ring-2 focus:ring-rose-400 transition-all">
+                </div>
+
+                <!-- Target Date & Time -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-rose-200/80 mb-1.5">Target Date</label>
+                        <input type="date" id="inputDate" class="w-full px-3 py-2 rounded-xl glass-input text-sm focus:ring-2 focus:ring-rose-400 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-rose-200/80 mb-1.5">Time</label>
+                        <input type="time" id="inputTime" class="w-full px-3 py-2 rounded-xl glass-input text-sm focus:ring-2 focus:ring-rose-400 transition-all">
+                    </div>
+                </div>
+
+                <!-- Warm Message Input -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-rose-200/80 mb-1.5">Personal Warm Message</label>
+                    <textarea id="inputMessage" rows="3" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-sm focus:ring-2 focus:ring-rose-400 transition-all resize-none" placeholder="Write something sweet..."></textarea>
+                </div>
+
+                <!-- Preset Background Gradient Picker -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-rose-200/80 mb-2">Preset Theme Gradients</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="applyPresetGradient('romantic')" class="h-10 rounded-lg bg-gradient-to-br from-rose-900 via-purple-900 to-slate-900 border border-white/20 hover:scale-105 transition-all" title="Romantic Dusk"></button>
+                        <button onclick="applyPresetGradient('sunset')" class="h-10 rounded-lg bg-gradient-to-br from-amber-800 via-rose-800 to-indigo-950 border border-white/20 hover:scale-105 transition-all" title="Warm Sunset"></button>
+                        <button onclick="applyPresetGradient('midnight')" class="h-10 rounded-lg bg-gradient-to-br from-slate-950 via-blue-950 to-purple-950 border border-white/20 hover:scale-105 transition-all" title="Midnight Stars"></button>
+                        <button onclick="applyPresetGradient('emerald')" class="h-10 rounded-lg bg-gradient-to-br from-emerald-950 via-teal-900 to-slate-950 border border-white/20 hover:scale-105 transition-all" title="Cozy Forest"></button>
+                    </div>
+                </div>
+
+                <!-- Custom Photo URL Background -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-rose-200/80 mb-1.5">Custom Image URL (Optional)</label>
+                    <input type="url" id="inputBgUrl" placeholder="https://images.unsplash.com/..." class="w-full px-3.5 py-2.5 rounded-xl glass-input text-sm focus:ring-2 focus:ring-rose-400 transition-all">
+                    <p class="text-[11px] text-white/50 mt-1">Paste a photo link from Unsplash, Imgur, or Pinterest.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drawer Footer Buttons -->
+        <div class="pt-6 border-t border-white/10 space-y-2">
+            <button onclick="saveAndApplySettings()" class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 font-semibold text-white text-sm shadow-lg shadow-rose-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-check"></i>
+                <span>Apply & Update View</span>
+            </button>
+            <button onclick="copyShareableLink()" class="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 font-medium text-white/90 text-sm transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-link"></i>
+                <span>Get Shareable Link</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Footer Footer -->
+    <footer class="relative z-10 w-full text-center py-4 text-xs text-white/50 tracking-wider">
+        Made for lovers everywhere • Mobile Safari & Android Ready
+    </footer>
+
+    <script>
+        // Default App State
+        let appState = {
+            title: "Until We Are Together",
+            subtitle: "Counting Down The Moments",
+            targetDate: "", // ISO string or format
+            message: "Every second spent apart is just another step closer to holding you again.",
+            bgType: "preset", // 'preset' or 'custom'
+            bgValue: "romantic", // preset key or image URL
+        };
+
+        // Preset gradient maps
+        const gradientPresets = {
+            romantic: "linear-gradient(to bottom right, #4c0519, #3b0764, #0f172a)",
+            sunset: "linear-gradient(to bottom right, #78350f, #881337, #1e1b4b)",
+            midnight: "linear-gradient(to bottom right, #020617, #172554, #3b0764)",
+            emerald: "linear-gradient(to bottom right, #022c22, #134e4a, #0f172a)"
+        };
+
+        let timerInterval = null;
+
+        // On Page Load: Parse URL params or initialize default target date
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.has('t')) appState.title = decodeURIComponent(urlParams.get('t'));
+            if (urlParams.has('s')) appState.subtitle = decodeURIComponent(urlParams.get('s'));
+            if (urlParams.has('m')) appState.message = decodeURIComponent(urlParams.get('m'));
+            if (urlParams.has('d')) appState.targetDate = urlParams.get('d');
+            if (urlParams.has('bg')) {
+                const bg = urlParams.get('bg');
+                if (bg.startsWith('http')) {
+                    appState.bgType = 'custom';
+                    appState.bgValue = decodeURIComponent(bg);
+                } else if (gradientPresets[bg]) {
+                    appState.bgType = 'preset';
+                    appState.bgValue = bg;
+                }
+            }
+
+            // If no target date supplied in URL, set default to 14 days from now
+            if (!appState.targetDate) {
+                const defaultDate = new Date();
+                defaultDate.setDate(defaultDate.getDate() + 14);
+                defaultDate.setHours(18, 0, 0, 0);
+                appState.targetDate = defaultDate.toISOString();
+            }
+
+            // Sync Form Inputs with App State
+            populateFormInputs();
+
+            // Apply Display State to DOM
+            renderState();
+
+            // Start Countdown Loop
+            startTimer();
+
+            // Initialize Floating Hearts Canvas Animation
+            initParticleCanvas();
+        };
+
+        function populateFormInputs() {
+            document.getElementById('inputTitle').value = appState.title;
+            document.getElementById('inputSubtitle').value = appState.subtitle;
+            document.getElementById('inputMessage').value = appState.message;
+
+            const targetObj = new Date(appState.targetDate);
+            if (!isNaN(targetObj.getTime())) {
+                const year = targetObj.getFullYear();
+                const month = String(targetObj.getMonth() + 1).padStart(2, '0');
+                const day = String(targetObj.getDate()).padStart(2, '0');
+                const hours = String(targetObj.getHours()).padStart(2, '0');
+                const mins = String(targetObj.getMinutes()).padStart(2, '0');
+
+                document.getElementById('inputDate').value = `${year}-${month}-${day}`;
+                document.getElementById('inputTime').value = `${hours}:${mins}`;
+            }
+
+            if (appState.bgType === 'custom') {
+                document.getElementById('inputBgUrl').value = appState.bgValue;
+            } else {
+                document.getElementById('inputBgUrl').value = '';
+            }
+        }
+
+        function renderState() {
+            document.getElementById('displayTitle').innerText = appState.title;
+            document.getElementById('displaySubtitle').innerText = appState.subtitle;
+            document.getElementById('displayMessage').innerText = `"${appState.message}"`;
+
+            // Format date for human display
+            const d = new Date(appState.targetDate);
+            if (!isNaN(d.getTime())) {
+                const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+                document.getElementById('displayTargetDate').innerHTML = `<i class="fa-regular fa-calendar-heart mr-1.5"></i> ${d.toLocaleDateString('en-US', options)}`;
+            }
+
+            // Apply Background
+            const bgOverlay = document.getElementById('bg-overlay');
+            if (appState.bgType === 'custom' && appState.bgValue) {
+                bgOverlay.style.backgroundImage = `url('${appState.bgValue}')`;
+            } else {
+                const gradient = gradientPresets[appState.bgValue] || gradientPresets.romantic;
+                bgOverlay.style.backgroundImage = gradient;
+            }
+        }
+
+        function applyPresetGradient(key) {
+            appState.bgType = 'preset';
+            appState.bgValue = key;
+            document.getElementById('inputBgUrl').value = '';
+            renderState();
+        }
+
+        function saveAndApplySettings() {
+            const title = document.getElementById('inputTitle').value.trim();
+            const subtitle = document.getElementById('inputSubtitle').value.trim();
+            const message = document.getElementById('inputMessage').value.trim();
+            const dateVal = document.getElementById('inputDate').value;
+            const timeVal = document.getElementById('inputTime').value || "00:00";
+            const bgUrl = document.getElementById('inputBgUrl').value.trim();
+
+            if (title) appState.title = title;
+            if (subtitle) appState.subtitle = subtitle;
+            if (message) appState.message = message;
+
+            if (dateVal) {
+                const combinedDate = new Date(`${dateVal}T${timeVal}:00`);
+                if (!isNaN(combinedDate.getTime())) {
+                    appState.targetDate = combinedDate.toISOString();
+                }
+            }
+
+            if (bgUrl) {
+                appState.bgType = 'custom';
+                appState.bgValue = bgUrl;
+            }
+
+            renderState();
+            startTimer();
+            toggleDrawer();
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const target = new Date(appState.targetDate).getTime();
+                const distance = target - now;
+
+                if (isNaN(target) || distance < 0) {
+                    document.getElementById('days').innerText = "00";
+                    document.getElementById('hours').innerText = "00";
+                    document.getElementById('minutes').innerText = "00";
+                    document.getElementById('seconds').innerText = "00";
+                    return;
+                }
+
+                // Time calculations for days, hours, minutes and seconds
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById('days').innerText = String(days).padStart(2, '0');
+                document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+                document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
+                document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+            }
+
+            updateCountdown();
+            // 1-second ticks reliable across mobile browsers
+            timerInterval = setInterval(updateCountdown, 1000);
+        }
+
+        function copyShareableLink() {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const params = new URLSearchParams();
+
+            params.set('t', appState.title);
+            params.set('s', appState.subtitle);
+            params.set('m', appState.message);
+            params.set('d', appState.targetDate);
+            params.set('bg', appState.bgValue);
+
+            const shareableUrl = `${baseUrl}?${params.toString()}`;
+
+            // Fallback clipboard method for mobile browsers inside iframe/webviews
+            try {
+                const dummy = document.createElement('input');
+                document.body.appendChild(dummy);
+                dummy.value = shareableUrl;
+                dummy.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+
+                const shareText = document.getElementById('shareBtnText');
+                const originalText = shareText.innerText;
+                shareText.innerText = "Copied!";
+                setTimeout(() => {
+                    shareText.innerText = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error("Failed to copy link", err);
+            }
+        }
+
+        function toggleDrawer() {
+            const drawer = document.getElementById('customizerDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+
+            const isClosed = drawer.classList.contains('translate-x-full');
+            if (isClosed) {
+                drawer.classList.remove('translate-x-full');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                drawer.classList.add('translate-x-full');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function initParticleCanvas() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = (canvas.width = window.innerWidth);
+            let height = (canvas.height = window.innerHeight);
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const particles = [];
+            const particleCount = 25;
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 3 + 1,
+                    speedY: Math.random() * 0.4 + 0.1,
+                    opacity: Math.random() * 0.5 + 0.2,
+                });
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, width, height);
+
+                particles.forEach((p) => {
+                    p.y -= p.speedY;
+                    if (p.y < -10) {
+                        p.y = height + 10;
+                        p.x = Math.random() * width;
+                    }
+
+                    ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animateParticles);
+            }
+
+            animateParticles();
+        }
+    </script>
+</body>
+</html>
