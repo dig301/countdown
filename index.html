@@ -16,7 +16,7 @@
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #0d070b;
+      background-color: #000000;
       color: #ffffff;
       overflow-x: hidden;
       min-height: 100vh;
@@ -33,7 +33,6 @@
       font-family: 'Cinzel', serif;
     }
 
-    /* Dynamic fluid typography for small screens */
     .responsive-title {
       font-size: clamp(1.75rem, 6vw, 3.75rem);
       letter-spacing: -0.02em;
@@ -41,35 +40,32 @@
 
     /* Glassmorphism tile container */
     .glass-tile {
-      background: rgba(18, 12, 16, 0.65);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.47);
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     }
 
-    /* Custom scrollbar reset */
-    ::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Dark Floral Pattern Canvas */
-    #floral-bg {
+    /* Background image container */
+    #bg-image {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      background-image: url('bg.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       z-index: 0;
-      pointer-events: none;
     }
 
-    /* Subtle ambient dark vignette */
+    /* Dark vignette overlay for contrast */
     .vignette-overlay {
-      background: radial-gradient(circle at center, rgba(13, 7, 11, 0.2) 0%, rgba(13, 7, 11, 0.85) 100%);
+      background: radial-gradient(circle at center, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.65) 100%);
     }
 
-    /* Tile responsive layout styling */
     .timer-tile {
       flex: 1 1 0;
       min-width: 68px;
@@ -89,10 +85,10 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen relative select-none antialiased">
 
-  <!-- Background Floral Canvas -->
-  <canvas id="floral-bg"></canvas>
+  <!-- Background Image -->
+  <div id="bg-image"></div>
 
-  <!-- Vignette Darkener -->
+  <!-- Dark Vignette Overlay -->
   <div class="vignette-overlay absolute inset-0 z-10 pointer-events-none"></div>
 
   <!-- Main Countdown Container -->
@@ -107,27 +103,27 @@
     <div class="flex flex-row items-center justify-center gap-2 sm:gap-4 md:gap-6 w-full max-w-2xl mb-8 sm:mb-10 px-1">
       
       <!-- Days -->
-      <div class="timer-tile glass-tile rounded-xl sm:rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center transition-transform duration-300">
+      <div class="timer-tile glass-tile rounded-xl sm:rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center">
         <span id="days" class="digit-number font-bold text-white font-mono tracking-tight">00</span>
-        <span class="digit-label font-medium text-gray-300 uppercase mt-2">DAYS</span>
+        <span class="digit-label font-medium text-gray-200 uppercase mt-2">DAYS</span>
       </div>
 
       <!-- Hours -->
-      <div class="timer-tile glass-tile rounded-xl sm:rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center transition-transform duration-300">
+      <div class="timer-tile glass-tile rounded-xl sm:rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center">
         <span id="hours" class="digit-number font-bold text-white font-mono tracking-tight">00</span>
-        <span class="digit-label font-medium text-gray-300 uppercase mt-2">HOURS</span>
+        <span class="digit-label font-medium text-gray-200 uppercase mt-2">HOURS</span>
       </div>
 
       <!-- Minutes -->
-      <div class="timer-tile glass-tile rounded-xl sm:rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center transition-transform duration-300">
+      <div class="timer-tile glass-tile rounded-xl sm:rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center">
         <span id="minutes" class="digit-number font-bold text-white font-mono tracking-tight">00</span>
-        <span class="digit-label font-medium text-gray-300 uppercase mt-2">MINUTES</span>
+        <span class="digit-label font-medium text-gray-200 uppercase mt-2">MINUTES</span>
       </div>
 
       <!-- Seconds -->
-      <div class="timer-tile glass-tile rounded-xl sm:rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center transition-transform duration-300">
+      <div class="timer-tile glass-tile rounded-xl sm:rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center">
         <span id="seconds" class="digit-number font-bold text-white font-mono tracking-tight">00</span>
-        <span class="digit-label font-medium text-gray-300 uppercase mt-2">SECONDS</span>
+        <span class="digit-label font-medium text-gray-200 uppercase mt-2">SECONDS</span>
       </div>
 
     </div>
@@ -142,7 +138,7 @@
   </main>
 
   <script>
-    // Target Date: October 1, 2026 at 15:30 Zurich time (CEST / UTC+2)
+    // Target Date: October 1 at 15:30 Zurich time
     const TARGET_DATE = new Date('2026-10-01T15:30:00+02:00').getTime();
 
     const daysEl = document.getElementById('days');
@@ -181,109 +177,8 @@
       totalSecondsEl.textContent = totalSeconds.toLocaleString();
     }
 
-    // Run timer immediately and update every second
     updateTimer();
     setInterval(updateTimer, 1000);
-
-    // Canvas rendering for Procedural Dark Floral Pattern
-    const canvas = document.getElementById('floral-bg');
-    const ctx = canvas.getContext('2d');
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      drawFloralPattern();
-    }
-
-    function drawFlower(x, y, radius, petColor, centerColor) {
-      const numPetals = 6;
-      ctx.save();
-      ctx.translate(x, y);
-
-      // Draw Petals
-      for (let i = 0; i < numPetals; i++) {
-        const angle = (i * Math.PI * 2) / numPetals;
-        ctx.beginPath();
-        ctx.rotate(angle);
-        ctx.ellipse(radius * 0.8, 0, radius * 0.7, radius * 0.4, 0, 0, Math.PI * 2);
-        ctx.fillStyle = petColor;
-        ctx.fill();
-        ctx.lineWidth = 0.5;
-        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-        ctx.stroke();
-      }
-
-      // Draw Flower Center
-      ctx.beginPath();
-      ctx.arc(0, 0, radius * 0.35, 0, Math.PI * 2);
-      ctx.fillStyle = centerColor;
-      ctx.fill();
-
-      ctx.restore();
-    }
-
-    function drawLeaves(x, y, angle) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle);
-      ctx.beginPath();
-      ctx.ellipse(15, 0, 18, 6, 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#1e101a';
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawFloralPattern() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Base dark fill
-      ctx.fillStyle = '#0d070b';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Procedural floral cluster placement
-      const seed = 42;
-      const clusters = [
-        // Top Left
-        { x: canvas.width * 0.08, y: canvas.height * 0.12, r: 28, color: '#8b1e2d' },
-        { x: canvas.width * 0.15, y: canvas.height * 0.22, r: 22, color: '#5b1f48' },
-        { x: canvas.width * 0.04, y: canvas.height * 0.35, r: 32, color: '#a32838' },
-        // Top Right
-        { x: canvas.width * 0.92, y: canvas.height * 0.1, r: 30, color: '#a32838' },
-        { x: canvas.width * 0.82, y: canvas.height * 0.2, r: 24, color: '#6a1b52' },
-        { x: canvas.width * 0.95, y: canvas.height * 0.32, r: 26, color: '#8b1e2d' },
-        // Bottom Left
-        { x: canvas.width * 0.06, y: canvas.height * 0.82, r: 34, color: '#a32838' },
-        { x: canvas.width * 0.16, y: canvas.height * 0.9, r: 25, color: '#5b1f48' },
-        { x: canvas.width * 0.02, y: canvas.height * 0.68, r: 22, color: '#7a1a31' },
-        // Bottom Right
-        { x: canvas.width * 0.9, y: canvas.height * 0.85, r: 32, color: '#8b1e2d' },
-        { x: canvas.width * 0.8, y: canvas.height * 0.78, r: 22, color: '#6a1b52' },
-        { x: canvas.width * 0.96, y: canvas.height * 0.68, r: 28, color: '#a32838' },
-      ];
-
-      // Draw Vine Connection Branches
-      ctx.strokeStyle = '#22111d';
-      ctx.lineWidth = 2;
-      clusters.forEach((item, index) => {
-        drawLeaves(item.x - 10, item.y - 10, index);
-        drawLeaves(item.x + 15, item.y + 10, index + 1);
-        drawFlower(item.x, item.y, item.r, item.color, '#d89a42');
-      });
-
-      // Subtle Background Stars / Dust
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-      for (let i = 0; i < 45; i++) {
-        const sx = Math.sin(i * 99) * canvas.width * 0.5 + canvas.width * 0.5;
-        const sy = Math.cos(i * 33) * canvas.height * 0.5 + canvas.height * 0.5;
-        const sSize = (i % 3) * 0.8 + 0.5;
-        ctx.beginPath();
-        ctx.arc(sx, sy, sSize, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
   </script>
 </body>
 </html>
